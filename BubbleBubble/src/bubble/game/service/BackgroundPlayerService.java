@@ -10,8 +10,7 @@ import javax.imageio.ImageIO;
 import bubble.game.component.Bubble;
 import bubble.game.component.Player;
 
-//메인스레드 바쁨 - 키보드 이벤트를 처리하기 바쁘다. 
-//background에서 계쏙 관찰함!!
+//background에서 계속 관찰
 public class BackgroundPlayerService implements Runnable {
 
 	private BufferedImage image;

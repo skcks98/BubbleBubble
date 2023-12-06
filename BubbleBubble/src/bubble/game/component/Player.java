@@ -54,32 +54,33 @@ public class Player extends JLabel implements Moveable {
 
 	private void initObject() {
 
-		playerR = new ImageIcon("image/playerR.png");
-		playerL = new ImageIcon("image/playerL.png");
-		playerRdie = new ImageIcon("image/playerRdie.png");
-		playerLdie = new ImageIcon("image/playerLdie.png");
+		playerR = new ImageIcon("image/player1_R.png");
+		playerL = new ImageIcon("image/player1_L.png");
+		playerRdie = new ImageIcon("image/player1_RD.png");
+		playerLdie = new ImageIcon("image/player1_RL.png");
 		bubbleList = new ArrayList<>();
 
 	}
 
+	public void reset() {
+        initSetting();
+    }
+	
 	private void initSetting() {
-		x = 80;
-		y = 535;
-
-		left = false;
-		right = false;
-		up = false;
-		down = false;
-		leftWallCrash = false;
-		rightWallCrash = false;
-
-		playerWay = PlayerWay.RIGHT;
-
-		setIcon(playerR);
-
-		setSize(50, 50);
-		setLocation(x, y);
-	}
+        x = 80;
+        y = 535;
+        left = false;
+        right = false;
+        up = false;
+        down = false;
+        leftWallCrash = false;
+        rightWallCrash = false;
+        playerWay = PlayerWay.RIGHT;
+        setIcon(playerR);
+        setSize(50, 50);
+        setLocation(x, y);
+        state = 0;
+    } 
 
 	private void initBackgroundPlayerService() {
 		new Thread(new BackgroundPlayerService(this)).start();
@@ -98,6 +99,8 @@ public class Player extends JLabel implements Moveable {
 			}
 		}).start();
 	}
+	
+	
 
 	@Override
 	public void left() {

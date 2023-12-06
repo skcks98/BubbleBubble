@@ -19,12 +19,18 @@ public class BackgroundEnemyService implements Runnable {
 
 	// player, bubble
 	public BackgroundEnemyService(Enemy enemy) {
-		this.enemy = enemy;
-		try {
-			image = ImageIO.read(new File("image/backgroundMapService.png"));
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
+	    this.enemy = enemy;
+	    try {
+	        File imageFile = new File("image/backgroundMapService.png");
+	        if (imageFile.exists()) {
+	            image = ImageIO.read(imageFile);
+	        } else {
+	            System.err.println("Error: Image file not found!");
+	        }
+	    } catch (Exception e) {
+	        System.err.println("Error loading image: " + e.getMessage());
+	        e.printStackTrace();
+	    }
 	}
 
 	@Override

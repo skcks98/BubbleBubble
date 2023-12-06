@@ -1,7 +1,8 @@
 package bubble.game.component;
 
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.*;
 
 import bubble.game.BubbleFrame;
 import bubble.game.Moveable;
@@ -14,186 +15,160 @@ import lombok.Setter;
 @Setter
 public class Enemy extends JLabel implements Moveable {
 
-	private BubbleFrame mContext;
-	private Player player;
+    private BubbleFrame mContext;
+    private Player player;
 
-	// 위치상태
-	private int x;
-	private int y;
+    private int x;
+    private int y;
 
-	// enemy의 방향
-	private EnemyWay enemyWay;
+    private EnemyWay enemyWay;
 
-	// 움직임 상태
-	private boolean left;
-	private boolean right;
-	private boolean up;
-	private boolean down;
+    private boolean left;
+    private boolean right;
+    private boolean up;
+    private boolean down;
 
-	private int state; // 0(살아있는 상태) 1(물방울에 갇힌 상태)
+    private int state;
 
-	// enemy 속도
-	private final int SPEED = 3; // 상수는 대문자로!!
-	private final int JUMP = 1; // UP,DOWN스피드
+    private final int SPEED = 3;
+    private final int JUMP = 1;
 
-	private ImageIcon enemyR, enemyL;
+    private ImageIcon enemyR, enemyL;
 
-	public Enemy(BubbleFrame mContext, EnemyWay enemyWay) {
-		this.mContext = mContext;
-		this.player = mContext.getPlayer();
-		initObject();
-		initSetting();
-		initBackgroundEnemyService();
-		initEnemyDirection(enemyWay);
+    public Enemy(BubbleFrame mContext, EnemyWay enemyWay) {
+        this.mContext = mContext;
+        this.player = mContext.getPlayer();
+        initObject();
+        initSetting(enemyWay);
+        initBackgroundEnemyService();
+    }
 
-	}
+    private void initObject() {
+        enemyR = new ImageIcon("image/enemyR.png");
+        enemyL = new ImageIcon("image/enemyL.png");
+    }
 
-	private void initObject() {
+    private void initSetting(EnemyWay enemyWay) {
+        // 주어진 방향을 기반으로 적의 초기 설정을 수행합니다.
+        x = 480;
+        y = 178;
+        left = false;
+        right = false;
+        up = false;
+        setSize(50, 50);
+        setLocation(x, y);
+        state = 0;
 
-		enemyR = new ImageIcon("image/enemyR.png");
-		enemyL = new ImageIcon("image/enemyL.png");
+        if (EnemyWay.RIGHT == enemyWay) {
+            this.enemyWay = EnemyWay.RIGHT;
+            setIcon(enemyR);
+            right();
+        } else {
+            this.enemyWay = EnemyWay.LEFT;
+            setIcon(enemyL);
+            left();
+        }
+    }
+    
+    public void reset() {
+        // 여기에 적을 다시 시작할 때 필요한 초기화 코드 작성
+        initSetting(enemyWay);  // 또는 다른 초기화 작업을 수행할 수 있습니다.
+    }
 
-	}
+    private void initBackgroundEnemyService() {
+        new Thread(new BackgroundEnemyService(this)).start();
+    }
 
-	private void initSetting() {
-		x = 480;
-		y = 178;
+    @Override
+    public void left() {
+        enemyWay = EnemyWay.LEFT;
+        left = true;
+        new Thread(() -> {
+            while (left) {
+                setIcon(enemyL);
+                x = x - SPEED;
+                setLocation(x, y);
+                if (Math.abs(x - player.getX()) < 50 && Math.abs(y - player.getY()) < 50) {
+                    if (player.getState() == 0 && getState() == 0)
+                        player.die();
+                }
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
 
-		left = false;
-		right = false;
-		up = false;
+    @Override
+    public void right() {
+        enemyWay = EnemyWay.RIGHT;
+        right = true;
+        new Thread(() -> {
+            while (right) {
+                setIcon(enemyR);
+                x = x + SPEED;
+                setLocation(x, y);
+                if (Math.abs(x - player.getX()) < 50 && Math.abs(y - player.getY()) < 50) {
+                    if (player.getState() == 0 && getState() == 0)
+                        player.die();
+                }
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
 
-		setSize(50, 50);
-		setLocation(x, y);
+    @Override
+    public void up() {
+        up = true;
+        new Thread(() -> {
+            for (int i = 0; i < 130 / JUMP; i++) {
+                y = y - JUMP;
+                setLocation(x, y);
+                if (Math.abs(x - player.getX()) < 50 && Math.abs(y - player.getY()) < 50) {
+                    if (player.getState() == 0 && getState() == 0)
+                        player.die();
+                }
+                try {
+                    Thread.sleep(5);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            up = false;
+            down();
+        }).start();
+    }
 
-		state = 0;
-	}
+    @Override
+    public void down() {
+        if (down == false) {
+            down = true;
+            new Thread(() -> {
+                while (down) {
+                    y = y + JUMP;
+                    setLocation(x, y);
+                    if (Math.abs(x - player.getX()) < 50 && Math.abs(y - player.getY()) < 50) {
+                        if (player.getState() == 0 && getState() == 0)
+                            player.die();
+                    }
+                    try {
+                        Thread.sleep(3);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                down = false;
+            }).start();
+        }
+    }
 
-	private void initEnemyDirection(EnemyWay enemyWay) {
-		if (EnemyWay.RIGHT == enemyWay) {
-			enemyWay = EnemyWay.RIGHT;
-			setIcon(enemyR);
-			right();
-		} else {
-			enemyWay = EnemyWay.LEFT;
-			setIcon(enemyL);
-			left();
-		}
-	}
-
-	private void initBackgroundEnemyService() {
-		new Thread(new BackgroundEnemyService(this)).start();
-	}
-
-	@Override
-	public void left() {
-		enemyWay = EnemyWay.LEFT;
-
-		left = true;
-		new Thread(() -> {
-			while (left) {
-				setIcon(enemyL);
-				x = x - SPEED;
-				setLocation(x, y);
-				if (Math.abs(x - player.getX()) < 50 && Math.abs(y - player.getY()) < 50) {
-					if (player.getState() == 0 && getState() == 0)
-						player.die();
-				}
-				try {
-					Thread.sleep(10);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}).start();
-	}
-
-	@Override
-	public void right() {
-		enemyWay = EnemyWay.RIGHT;
-
-		right = true;
-		new Thread(() -> {
-			while (right) {
-				setIcon(enemyR);
-				x = x + SPEED;
-				setLocation(x, y);
-				if (Math.abs(x - player.getX()) < 50 && Math.abs(y - player.getY()) < 50) {
-					if (player.getState() == 0 && getState() == 0)
-						player.die();
-				}
-
-				try {
-					Thread.sleep(10);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}).start();
-
-	}
-
-	@Override
-	public void up() {
-		up = true;
-		new Thread(() -> {
-			for (int i = 0; i < 130 / JUMP; i++) {
-				y = y - JUMP;
-				setLocation(x, y);
-
-				if (Math.abs(x - player.getX()) < 50 && Math.abs(y - player.getY()) < 50) {
-					if (player.getState() == 0 && getState() == 0)
-						player.die();
-				}
-				try {
-					Thread.sleep(5);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			up = false;
-			down();
-		}).start();
-	}
-
-	@Override
-	public void down() {
-
-		if (down == false) {
-			down = true;
-			new Thread(() -> {
-				while (down) {
-					y = y + JUMP;
-					setLocation(x, y);
-
-					if (Math.abs(x - player.getX()) < 50 && Math.abs(y - player.getY()) < 50) {
-						if (player.getState() == 0 && getState() == 0)
-							player.die();
-					}
-					try {
-						Thread.sleep(3);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				down = false;
-			}).start();
-		}
-	}
-	
-	public int getState() {
-	    return state;
-	}
-
-	public boolean isUp() {
-	    return up;
-	}
-
-	public boolean isDown() {
-	    return down;
-	}
-
+    public int getState() { return state; }
+    public boolean isUp() {return up; }
+    public boolean isDown() { return down; }
 }

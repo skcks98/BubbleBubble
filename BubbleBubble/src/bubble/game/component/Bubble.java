@@ -18,28 +18,25 @@ public class Bubble extends JLabel implements Moveable {
 	private Player player;
 	private BackgroundBubbleService backgroundBubbleService;
 	private BubbleFrame mContext;
-	private List<Enemy> enemys;
+	private List<Enemy> enemy;
 	private Enemy removeEnemy = null;
 
-	// ��ġ ����
 	private int x;
 	private int y;
 
-	// ������ ����
 	private boolean left;
 	private boolean right;
 	private boolean up;
 
-	// ������ ���� ����
-	private int state; // 0(�����), 1(���� ���� �����)
-	private ImageIcon bubble; // �����
-	private ImageIcon bubbled; // ���� ���� �����
-	private ImageIcon bomb; // ������� ���� ����
+	private int state; 
+	private ImageIcon bubble; 
+	private ImageIcon bubbled; 
+	private ImageIcon bomb; 
 
 	public Bubble(BubbleFrame mContext) {
 		this.mContext = mContext;
 		this.player = mContext.getPlayer();
-		this.enemys = mContext.getEnemys();
+		this.enemy = mContext.getEnemy();
 		initObject();
 		initSetting();
 	}
@@ -64,8 +61,8 @@ public class Bubble extends JLabel implements Moveable {
 		setSize(50, 50);
 
 		state = 0;
-
 	}
+	
 
 	@Override
 	public void left() {
@@ -79,7 +76,7 @@ public class Bubble extends JLabel implements Moveable {
 				break;
 			}
 
-			for (Enemy e : enemys) {
+			for (Enemy e : enemy) {
 				if (Math.abs(x - e.getX()) < 10 && Math.abs(y - e.getY()) > 0 && Math.abs(y - e.getY()) < 50) {
 					if (e.getState() == 0) {
 						attack(e);
@@ -110,7 +107,7 @@ public class Bubble extends JLabel implements Moveable {
 				break;
 			}
 
-			for (Enemy e : enemys) {
+			for (Enemy e : enemy) {
 				if (Math.abs(x - e.getX()) < 10 && Math.abs(y - e.getY()) > 0 && Math.abs(y - e.getY()) < 50) {
 					if (e.getState() == 0) {
 						attack(e);
@@ -142,9 +139,9 @@ public class Bubble extends JLabel implements Moveable {
 			}
 
 			try {
-				if (state == 0) { // �⺻ �����
+				if (state == 0) {
 					Thread.sleep(1);
-				} else { // ���� ���� �����
+				} else { 
 					Thread.sleep(10);
 				}
 
@@ -153,9 +150,8 @@ public class Bubble extends JLabel implements Moveable {
 				e.printStackTrace();
 			}
 		}
-		if (state == 0) {
-			clearBubble(); // up�� ������ ������ õ�忡 �����ϰ� ���� 3�� �� �޸𸮿��� �Ҹ��Ű��
-		}
+		if (state == 0)
+			clearBubble();
 	}
 
 	@Override
@@ -164,20 +160,19 @@ public class Bubble extends JLabel implements Moveable {
 		e.setState(1);
 		setIcon(bubbled);
 		removeEnemy = e;
-		mContext.remove(e); // memory���� �������!!
+		mContext.remove(e);
 		mContext.repaint();
 	}
 
-	// ���� -> clear -> bubble
 	private void clearBubble() {
 		try {
 			Thread.sleep(3000);
 			setIcon(bomb);
 			Thread.sleep(2000);
-			// ���� ��ü �޸𸮿��� ������
+			
 			mContext.getPlayer().getBubbleList().remove(this);
-			mContext.remove(this); // bubbleframe�� bubble�� �޸𸮿��� �Ҹ�
-			mContext.repaint(); // bubbleframe�� ��ü�� �ٽ� �׸�(�޸𸮿� ���°� �ȱ׸�)
+			mContext.remove(this); 
+			mContext.repaint();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -190,9 +185,8 @@ public class Bubble extends JLabel implements Moveable {
 				up = false;
 				setIcon(bomb);
 				Thread.sleep(1000);
-				// ���� ��ü �޸𸮿��� ������
 				mContext.getPlayer().getBubbleList().remove(this);
-				mContext.getEnemys().remove(removeEnemy);
+				mContext.getEnemy().remove(removeEnemy);
 				mContext.remove(this);
 				mContext.repaint();
 			} catch (Exception e) {
